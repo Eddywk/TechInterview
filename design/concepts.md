@@ -21,7 +21,7 @@ Solutions:
 1. Add redundancy to the individual hardware components in order to reduce the failure rate of the system.
 2. Move toward systems that can tolerate the loss of entire machines. e.g. Having planned downtime for reboot.
 
-###Software Errors
+### Software Errors
 Lots of small things can help: carefully thinking about assumptions and interactions in the system; Thorough testing; process isolation; allowing processes to crash and restart; measuring. monitoring, and analyzing system behavior in production; Raising an alert if breaching SLA.
 
 ### Human Errors
@@ -41,5 +41,5 @@ Solutions:
 ## Scalability
 
 
-##Maintainability
+## Maintainability
 
