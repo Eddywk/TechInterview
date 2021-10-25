@@ -39,7 +39,22 @@ Solutions:
 * **Implement good management practices and training.**
 
 ## Scalability
+**Scalability** means having strategies for keeping performance good, even when load increases.
 
+### Describing Load
+Load can be described with a few numbers which we call **load parameters**: TPS, the ratio of reads to writes in a database, concurrency, hit rate on a cache.
+
+### Describing Performance
+**Throughput** - the number of records we can process per second, or the total time it takes to run a job on a dataset of a certain size.
+
+### Approaches for Coping with Load
+1. Scaling up, vertical scaling, moving to more powerful machine.
+2. Scaling out, horizontal scaling, distributing the load across multiple smaller machines.
 
 ## Maintainability
+**Maintainability** has many facets, but in essence it's about making life better the engineering and operations teams who need to work with the system.
+
+* **Operability**: Make it easy for operations team to keep the system running smoothly.
+* **Simplicity**: Make it easy for new engineers to understand the system, by removing as much complexity as possible from the system.
+* **Evolvability**: Make it easy for engineers to make changes to the system in the future, adapting it for unanticipated use cases as requirements change.
 
