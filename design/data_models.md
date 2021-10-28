@@ -1,5 +1,4 @@
 ##Data Models
-
 ### Relationships
 
 * **Many-to-One (m:1)**
@@ -26,7 +25,7 @@
 
 "**NoSQL**" datastores have diverged in two main directions:
 1. **Document databases** target use cases where data comes in self-contained documents and relationships between document and another are rare.
-2. Graph databases go in the opposite direction, targeting use cases where anything is potentially related to everything.
+2. **Graph databases** go in the opposite direction, targeting use cases where anything is potentially related to everything.
 
 Both of document and graph database don't enforce a schema, which can make it easier to adapt applications to changing requirements.
 
