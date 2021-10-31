@@ -1,6 +1,6 @@
-#Database
+# Database
 
-##Index
+## Index
 An index is an additional structure that is derived from the primary data.
 
 Many databases allow you to add and remove indexes, and this doesn't affect the contents of the database; 
@@ -10,7 +10,7 @@ Maintaining additional structures incurs overhead, especially on writes.
 This is an important trade-off in storage systems: 
 well-chosen indexes speed up read queries, but every index slows down writes.
 
-###Hash Indexes
+### Hash Indexes
 
 The very simple hash index implementation, you will need two components:
 1. Data File: An append-only data file on disk
