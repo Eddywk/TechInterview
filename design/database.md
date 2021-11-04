@@ -160,3 +160,54 @@ SSTables have **several big advantages over log segments over _hash indexes_**:
      * Adoption: HBase, Cassandra
    * leveled compaction: older data is moved into separate "levels".
      * Adoption: LevelDB, RocksDB, Cassandra
+
+### B-Trees
+
+B-tree keep key-value pairs sorted by key like SSTable, which allows efficient key-value lookups and range queries.
+
+The major difference is B-Tree break the database down into fixed-size
+_**blocks**_ or _**pages**_ (usually 4KB traditionally), reads or writes one page at a time.
+While segment(SSTable) is variable size, usually several MB or more in size.
+
+![looking up a key using a b-tree index](https://ebrary.net/htm/img/15/554/22.png)
+
+The number of references to child pages in one page of the B-tree is called the _**branching factor**_.
+
+**Page Split**: 
+If there isn't enough free space in the page to accommodate a new key:
+
+1. the page will be split into two half-full pages. 
+2. the parent page is updated to account for the new subdivision of key range.
+
+Page split ensures that the tree remains _**balanced**_: a B-tree with _**_n keys_**_ always has a _**depth of O(logn)**_
+
+![growing a b-tree by splitting a page](https://ebrary.net/htm/img/15/554/22.png)
+
+**Reliability Improvements**
+
+**WAL (write-ahead log)**, also known as **redo log**: it's append-only file to which every B-tree modification must be written 
+before it can be applied to pages of the tree itself.
+
+**Latches**: lightweight locks for concurrency control.
+
+**B-tree Optimizations**
+
+* Abbreviating keys to save space in pages.
+* Additional pointers have been added to the tree.
+  * e.g. each leaf page may have references to its sibling pages.
+
+### B-tree vs LSM-Tree
+
+As a rule of thumb, **LST-Trees** are typically **faster for writes**, 
+whereas **B-trees** are thought to be **faster for reads**.
+
+A B-tree index must write every piece of data at least twice:
+1. Write to WAL (write-ahead log)
+2. Write to tree page itself
+3. Write to pages if page split needed
+
+LSM-Trees runs compaction in background, the bigger the database gets, 
+the more disk bandwidth is required for compaction.
+
+B-tree offer strong transactional semantics: each key exists in exactly one place in the index, while LSM-Trees may have
+multiple copies of the same key in different segments.
