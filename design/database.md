@@ -16,6 +16,8 @@ The very simple hash index implementation, you will need two components:
 1. Data File: An append-only data file on disk
 2. Hash Map: A in-memory hash map where every key is mapped to a byte offset in the data file
 
+![In-Memory-HashMap](https://ebrary.net/htm/img/15/554/17.png)
+
 **Write Operation:**
 
 Whenever you append a new key-value pair to the data file, 
@@ -91,7 +93,7 @@ so they can be read concurrently by multiple threads.
 In comparing with update data file in place and overwriting the old value with one new, 
 an append-only design turns out to be good for several reasons:
 
-* Appending and segment merging (compaction) are sequential writes operations, 
+* Appending and segment merging (compaction) are **sequential writes operations**, 
 which are generally much faster than random writes, especially for both of magnetic spinning-disk hard drives and SSDs.
 * Concurrency and crash recovery are much simpler for append-only or immutable. 
 For example, if you choose update file in place, when crash happens while a value was being overwritten, 
@@ -104,3 +106,57 @@ In principle, maintaining a hash map on disk requires a lot of random access I/O
 it's expensive to grow when it becomes full, and cause hash collisions on disk address.
 * Range queries are not efficient.
 You cannot easily scan over all keys within a range, you have to look up all keys individually in the hash maps.
+
+
+### SSTables and LSM-Trees
+**SSTable (Sorted String Table)**: The format of the sequence of key-value pairs is sorted by key.
+
+**LSM-Tree (Log-Structure Merge Tree)**: The original name of index structure of SSTable.
+
+The basic idea if LSM-Trees - keeping a cascade of SSTables that are merged in the background - is simple and effective.
+
+![Image of SSTable](https://etcnotes.com/posts/sstable-and-lsm/sparse-index.png)
+
+SSTables have **several big advantages over log segments over _hash indexes_**:
+
+1. **Merging segments is simple and efficient.**
+   1. Even if the files are bigger than memory. 
+       Because each segment is sorted by key, we can use _**mergesort algorithm**_. 
+   2. Because all segments are written in their produced time, 
+   we can only choose a key in the most recent segment and discard others for the same key 
+   if the key appears in multiple segments.
+2. **No need to keep an index of all keys in memory.**
+   1. We can build a sparse index for some keys: one key for every few KB. And find a particular key via binary search.
+3. **Records within the same index range can be grouped and compressed.**
+   1. Each entry of the sparse in-memory index points at the start of a compressed block.
+   2. Data compression saves disk space and also reduces I/O bandwidth use.
+
+**Maintaining SSTables:**
+
+* **Initialization**
+  * Construct an in-memory balanced tree data structure. e.g a _**red-black tree**_.
+  * This in-memory tree sometimes called _**memtable**_.
+* **Writes**
+  * Add the key to memtable.
+* **Reads**
+  1. Try to find the key in memtable first.
+  2. Check the most recent SSTable file on disk.
+  3. Then the next-older SSTable file and so on.
+* **Write segment files to disk**
+  * Write the memtable as SSTable file to disk when reachs memtable's memory threshold, usually a few MB.
+  * New writes can continue to a new memtable instance.
+* **Compaction**
+  * Run merging and compaction process in background to combine SSTable files.
+
+**Performance Optimizations:**
+
+1. **Bloom filters**
+   * A Bloom filter is a memory-efficient data structure for approximating the contents of a set.
+   * It can tell you if a key doesn't appear in the database to save many unnecessary disk reads for nonexistent keys.
+   * In other words, a query returns either "possibly in set" or "definitely not in set".
+2. **size-tiered compaction** v.s. **leveled compaction**
+   * Different strategies to determine the order and timing of how SSTables are compacted and merged.
+   * size-tiered compaction: newer and smaller SSTables --> merge --> larger and older ones
+     * Adoption: HBase, Cassandra
+   * leveled compaction: older data is moved into separate "levels".
+     * Adoption: LevelDB, RocksDB, Cassandra
