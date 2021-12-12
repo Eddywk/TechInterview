@@ -204,11 +204,14 @@ How does the database know if a query result might have changed?
 
 **Detecting when a transaction reads outdated values from an MVCC snapshot.**
 ![Detecting when a transaction reads outdated values from an MVCC snapshot.](https://ebrary.net/htm/img/15/554/77.png)
+
 Database needs to track when a transaction ignores another transaction’s writes due to MVCC visibility rules. 
-When the transaction wants to commit, the database checks whether any of the ignored writes have now been committed. If so, the transaction must be aborted.
+When the transaction wants to commit, the database checks whether any of the ignored writes have now been committed. 
+If so, the transaction must be aborted.
 
 **In serializable snapshot isolation, detecting when one transaction modifies another transaction's reads.**
 ![In serializable snapshot isolation, detecting when one transaction modifies another transaction's reads.](https://ebrary.net/htm/img/15/554/78.png)
+
 When a transaction writes to the database, it must look in the indexes for any other transactions that have recently 
 read the affected data. This process is similar to acquiring a write lock on the affected key range, but rather than 
 blocking until the readers have committed, the lock acts as a tripwire: it simply notifies the transactions that the 
