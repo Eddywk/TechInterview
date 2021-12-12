@@ -190,19 +190,29 @@ checking for matching locks becomes time-consuming. For that reason, most databa
 **index-range locking** (also known as **next-key locking**), which is a simplified approximation of predicate locking.
 
 ### Serializable Snapshot Isolation (SSI)
+Serializable Snapshot Isolation (SSI) uses an optimistic approach, allowing transactions to proceed without blocking.
+When a transaction wants to commit, it is checked, and it is aborted if the execution was not serializable.
+
+Compared to two-phase locking, the big advantage of serializable snapshot isolation is that one transaction doesn’t
+need to block waiting for locks held by another transaction.
+
+Compared to serial execution, serializable snapshot isolation is not limited to the throughput of a single CPU core.
+
 How does the database know if a query result might have changed?
 * Detecting reads of a stale MVCC object version (uncommitted write occurred before the read)
 * Detecting writes that affect prior reads (the write occurs after the read)
 
 **Detecting when a transaction reads outdated values from an MVCC snapshot.**
 ![Detecting when a transaction reads outdated values from an MVCC snapshot.](https://ebrary.net/htm/img/15/554/77.png)
+Database needs to track when a transaction ignores another transaction’s writes due to MVCC visibility rules. 
+When the transaction wants to commit, the database checks whether any of the ignored writes have now been committed. If so, the transaction must be aborted.
 
 **In serializable snapshot isolation, detecting when one transaction modifies another transaction's reads.**
 ![In serializable snapshot isolation, detecting when one transaction modifies another transaction's reads.](https://ebrary.net/htm/img/15/554/78.png)
+When a transaction writes to the database, it must look in the indexes for any other transactions that have recently 
+read the affected data. This process is similar to acquiring a write lock on the affected key range, but rather than 
+blocking until the readers have committed, the lock acts as a tripwire: it simply notifies the transactions that the 
+data they read may no longer be up to date.
 
-Compared to two-phase locking, the big advantage of serializable snapshot isolation is that one transaction doesn’t 
-need to block waiting for locks held by another transaction. 
-
-Compared to serial execution, serializable snapshot isolation is not limited to the throughput of a single CPU core.
 
 
